@@ -1,0 +1,125 @@
+.form-container {
+  max-width: 450px;
+  margin: var(--spacing-xl) auto;
+  padding: var(--spacing-lg);
+  background-color: var(--secondary-bg);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
+  transition: background-color var(--transition-speed), border-color var(--transition-speed);
+  box-shadow: 0 8px 30px var(--box-shadow-color);
+}
+
+.form-container h2 {
+  text-align: center;
+  margin-bottom: var(--spacing-lg);
+}
+
+.form-field {
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+
+.form-field label {
+  display: block;
+  margin-bottom: var(--spacing-sm);
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.form-field input,
+.form-field select,
+.form-field textarea {
+  width: 100%;
+  padding: 0.8rem;
+  background-color: var(--primary-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  color: var(--text-primary);
+  font-size: 1rem;
+  transition: all var(--transition-speed);
+  font-family: var(--font-body);
+}
+
+.form-field textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.form-field input:focus,
+.form-field select:focus,
+.form-field textarea:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2);
+}
+
+.form-field .icon {
+  position: absolute;
+  top: 50%;
+  right: 1rem;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+}
+
+.form-container .btn {
+  width: 100%;
+  margin-top: var(--spacing-md);
+}
+
+.form-footer {
+  text-align: center;
+  margin-top: var(--spacing-lg);
+  font-size: 0.9rem;
+}
+
+.form-footer a {
+  font-weight: 500;
+}
+
+/* Time Slot Selection */
+.time-slots {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: var(--spacing-sm);
+}
+
+.time-slot {
+  padding: var(--spacing-sm);
+  background-color: var(--primary-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  text-align: center;
+  cursor: pointer;
+  transition: all var(--transition-speed);
+}
+
+.time-slot:hover {
+  background-color: var(--accent-color);
+  color: var(--primary-bg);
+  border-color: var(--accent-color);
+}
+
+.time-slot.selected {
+  background-color: var(--accent-color);
+  color: var(--primary-bg);
+  font-weight: bold;
+  border-color: var(--accent-hover);
+}
+
+.form-message {
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+  border-radius: var(--border-radius);
+  text-align: center;
+  display: none;
+}
+.form-message.success {
+  background-color: var(--success-color);
+  color: white;
+  display: block;
+}
+.form-message.error {
+  background-color: var(--error-color);
+  color: white;
+  display: block;
+}
