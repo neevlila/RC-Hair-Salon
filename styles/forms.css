@@ -40,6 +40,12 @@
   font-family: var(--font-body);
 }
 
+/* Make calendar/time picker indicators white on dark backgrounds */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+
 .form-field textarea {
   min-height: 100px;
   resize: vertical;

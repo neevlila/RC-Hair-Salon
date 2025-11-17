@@ -9,9 +9,19 @@ const HomePage = {
       { name: 'Modern Fade', price: '1200', img: 'https://images.unsplash.com/photo-1622286342621-4bd78cf2e59a?q=80&w=2574&auto=format&fit=crop' },
       { name: 'Beard Trim & Style', price: '600', img: 'https://images.unsplash.com/photo-1632345031435-8727f669d281?q=80&w=2574&auto=format&fit=crop' },
       { name: 'Royal Shave', price: '900', img: 'https://images.unsplash.com/photo-1621607512022-6aecc4fed814?q=80&w=2670&auto=format&fit=crop' },
+      { name: 'Luxury Scalp Treatment', price: '1100', img: 'https://images.unsplash.com/photo-1590556642351-3d22f3da04c9?q=80&w=2574&auto=format&fit=crop', desktopOnly: true },
+      { name: 'Hair Spa & Massage', price: '1400', img: 'https://images.unsplash.com/photo-1612705227716-707bfb3b542f?q=80&w=2574&auto=format&fit=crop', desktopOnly: true },
     ];
 
-    const timeSlots = ['10:00', '11:00', '12:00', '14:00', '15:00', '16:00', '17:00', '18:00'];
+    const fmtDate = (d) => {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    };
+    const today = new Date();
+    const maxDate = new Date(today);
+    maxDate.setDate(today.getDate() + 2);
 
     return `
       <section class="hero">
@@ -29,7 +39,7 @@ const HomePage = {
         </div>
         <div class="services-grid">
           ${services.map((service, index) => `
-            <div class="service-card gsap-reveal" data-gsap-delay="${index * 0.1}">
+            <div class="service-card gsap-reveal ${service.desktopOnly ? 'desktop-only' : ''}" data-gsap-delay="${index * 0.1}">
               <div class="service-image-wrapper">
                 <img src="${service.img}" alt="${service.name}" class="service-image">
               </div>
@@ -83,11 +93,12 @@ const HomePage = {
                 <textarea id="custom-haircut" name="custom_haircut" placeholder="e.g., 'High fade with a textured top' or specific instructions."></textarea>
               </div>
               <div class="form-field">
-                <label>Preferred Time</label>
-                <div class="time-slots">
-                  ${timeSlots.map(slot => `<div class="time-slot" data-time="${slot}">${slot}</div>`).join('')}
-                </div>
-                <input type="hidden" id="time-slot-input" name="time" required>
+                <label for="booking-date">Preferred Date</label>
+                <input type="date" id="booking-date" name="date" required min="${fmtDate(today)}" max="${fmtDate(maxDate)}">
+              </div>
+              <div class="form-field">
+                <label for="booking-time">Preferred Time</label>
+                <input type="time" id="booking-time" name="time" required step="1800">
               </div>
               <button type="submit" class="btn">Confirm Booking</button>
             </form>
@@ -129,33 +140,75 @@ const HomePage = {
       });
     });
 
-    // Time slot selection
-    const timeSlotsContainer = document.querySelector('.time-slots');
-    if (timeSlotsContainer) {
-      const timeSlotInput = document.getElementById('time-slot-input');
-      timeSlotsContainer.addEventListener('click', (e) => {
-        if (e.target.classList.contains('time-slot')) {
-          timeSlotsContainer.querySelectorAll('.time-slot').forEach(slot => slot.classList.remove('selected'));
-          e.target.classList.add('selected');
-          timeSlotInput.value = e.target.dataset.time;
-        }
-      });
+    // Date range (today to next 2 days)
+    const dateInput = document.getElementById('booking-date');
+    const timeInput = document.getElementById('booking-time');
+    if (dateInput) {
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = String(now.getMonth() + 1).padStart(2, '0');
+      const d = String(now.getDate()).padStart(2, '0');
+      const min = `${y}-${m}-${d}`;
+      const maxD = new Date(now);
+      maxD.setDate(now.getDate() + 2);
+      const max = `${maxD.getFullYear()}-${String(maxD.getMonth() + 1).padStart(2, '0')}-${String(maxD.getDate()).padStart(2, '0')}`;
+      dateInput.setAttribute('min', min);
+      dateInput.setAttribute('max', max);
+      if (!dateInput.value) dateInput.value = min;
     }
 
-    // Web3Forms booking form submission
     const form = document.getElementById('booking-form');
     if (form) {
       const result = document.getElementById('form-result');
-      const timeSlotInput = document.getElementById('time-slot-input');
+      const dateInputEl = document.getElementById('booking-date');
+      const timeInputEl = document.getElementById('booking-time');
+      const SLOT_CAPACITY = 2;
+      const STEP_MINUTES = 30;
+      const storageKeyFor = (dateStr, timeStr) => `booking:${dateStr} ${timeStr}`;
+      const getCount = (key) => parseInt(localStorage.getItem(key) || '0', 10);
+      const incCount = (key) => localStorage.setItem(key, String(getCount(key) + 1));
+      const minutesOk = (timeStr) => {
+        const [hh, mm] = timeStr.split(':').map(Number);
+        return mm % STEP_MINUTES === 0;
+      };
       form.addEventListener('submit', function(e) {
         e.preventDefault();
-        if (!timeSlotInput.value) {
-          result.innerHTML = "Please select a time slot.";
+        const formData = new FormData(form);
+        const object = Object.fromEntries(formData);
+
+        // Basic required field checks
+        if (!object.name || !object.name.trim()) {
+          result.innerHTML = "Please enter your full name.";
           result.className = 'form-message error';
           return;
         }
-        const formData = new FormData(form);
-        const object = Object.fromEntries(formData);
+        const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(object.email || '');
+        if (!emailOk) {
+          result.innerHTML = "Please enter a valid email address.";
+          result.className = 'form-message error';
+          return;
+        }
+        if (!object.service || object.service === '') {
+          result.innerHTML = "Please select a service.";
+          result.className = 'form-message error';
+          return;
+        }
+        if (!dateInputEl.value || !timeInputEl.value) {
+          result.innerHTML = "Please choose date and time.";
+          result.className = 'form-message error';
+          return;
+        }
+        if (!minutesOk(timeInputEl.value)) {
+          result.innerHTML = `Please pick a time in ${STEP_MINUTES}-minute intervals (e.g., 10:00, 10:30).`;
+          result.className = 'form-message error';
+          return;
+        }
+        const key = storageKeyFor(dateInputEl.value, timeInputEl.value);
+        if (getCount(key) >= SLOT_CAPACITY) {
+          result.className = 'form-message error';
+          result.innerHTML = 'This slot is fully booked. Please choose a time 30 minutes later.';
+          return;
+        }
         const json = JSON.stringify(object);
         result.innerHTML = "Please wait...";
         result.className = 'form-message';
@@ -174,6 +227,7 @@ const HomePage = {
           if (response.status == 200) {
             result.className = 'form-message success';
             result.innerHTML = json.message;
+            incCount(key);
           } else {
             console.log(response);
             result.className = 'form-message error';
@@ -187,7 +241,6 @@ const HomePage = {
         })
         .then(function() {
           form.reset();
-          timeSlotsContainer.querySelectorAll('.time-slot').forEach(slot => slot.classList.remove('selected'));
           setTimeout(() => {
             result.style.display = "none";
           }, 5000);

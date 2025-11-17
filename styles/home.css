@@ -147,3 +147,8 @@ html:not(.dark) .hero-content h1, html:not(.dark) .hero-content p {
   box-shadow: 0 4px 16px var(--box-shadow-color);
 }
 .booking-highlights li i { color: var(--accent-color); }
+
+/* Responsive: hide desktop-only service cards on mobile */
+@media (max-width: 768px) {
+  .service-card.desktop-only { display: none; }
+}

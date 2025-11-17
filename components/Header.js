@@ -10,7 +10,7 @@ const Header = {
     `;
 
     return `
-      <a href="/" class="logo" data-link>RC The Hair Studio</a>
+      <a href="/" class="logo" data-link><img src="https://i.ibb.co/HLxmwRKt/RC-Hair-Salon.png" alt="RC-Hair-Salon" class="logo-img" loading="lazy">The Hair Studio</a>
       <nav class="nav-menu">
         ${navLinks}
       </nav>
